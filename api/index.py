@@ -1,7 +1,7 @@
 import os
-import asyncio
 from fastapi import FastAPI  # type: ignore
 from fastapi.responses import PlainTextResponse  # type: ignore
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel  # type: ignore
 from openai import OpenAI  # type: ignore
 from langgraph_sdk.client import get_client
@@ -28,7 +28,7 @@ def get_thread_id():
 class QuestionRequest(BaseModel):
     question: str
 
-@app.post("/api", response_class=PlainTextResponse)
+@app.post("/api")
 def ask(body: QuestionRequest):
     # client = OpenAI()
     # prompt = [{"role": "user", "content": body.question}]
@@ -47,5 +47,14 @@ def ask(body: QuestionRequest):
 
     # Start a streaming run
     query = {"messages": [{"role": "human", "content": body.question}]}
-    for chunk in langsmith_client.runs.stream(thread_id, LANGSMITH_AGENT_ID, input=query):
-        print("Yes")
+    
+    def event_stream():
+        for chunk in langsmith_client.runs.stream(thread_id, LANGSMITH_AGENT_ID, input=query):
+            text = chunk.data['messages'][1]['content']
+            if text:
+                lines = text.split("\n")
+                for line in lines:
+                    yield f"data: {line}\n"
+                yield "\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
