@@ -18,16 +18,6 @@ langsmith_client = get_client(
     },
 )
 
-# Start a new thread
-thread = await langsmith_client.threads.create()
-
-# Start a streaming run
-query = {"messages": [{"role": "human", "content": "How can you help me improve my German writing skills?"}]}
-async for chunk in langsmith_client.runs.stream(thread['thread_id'], LANGSMITH_AGENT_ID, input=query):
-    print("yes")
-
-# response = await langsmith_client.runs.create(thread['thread_id'], LANGSMITH_AGENT_ID, input=query)
-
 app = FastAPI()
 
 # Start a new thread
