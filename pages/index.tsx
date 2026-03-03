@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 
 export default function Home() {
     const [question, setQuestion] = useState<string>('');
@@ -16,7 +19,14 @@ export default function Home() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ question }),
             });
-            setAnswer(await res.text());
+            setAnswer('');
+            const reader = res.body!.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                setAnswer(prev => prev + decoder.decode(value, { stream: true }));
+            }
         } catch (err) {
             setAnswer('Error: ' + (err instanceof Error ? err.message : String(err)));
         } finally {
@@ -46,9 +56,11 @@ export default function Home() {
                 </button>
                 {answer && (
                     <div className="p-6 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm">
-                        <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                            {answer}
-                        </p>
+                        <div className="text-gray-900 dark:text-gray-100">
+                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                                {answer}
+                            </ReactMarkdown>
+                        </div>
                     </div>
                 )}
             </div>
