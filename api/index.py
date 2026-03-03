@@ -10,47 +10,48 @@ LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
 LANGSMITH_API_URL = os.getenv("LANGSMITH_API_URL")
 LANGSMITH_AGENT_ID = os.getenv("LANGSMITH_AGENT_ID")
 
-langsmith_client = get_client(
-    url=LANGSMITH_API_URL,
-    api_key=LANGSMITH_API_KEY,
-    headers={
-        "X-Auth-Scheme": "langsmith-api-key",
-    },
-)
-
 app = FastAPI()
 
-# Start a new thread
-def get_thread_id():
-    thread = langsmith_client.threads.create()
-    return thread['thread_id']
+# langsmith_client = get_client(
+#     url=LANGSMITH_API_URL,
+#     api_key=LANGSMITH_API_KEY,
+#     headers={
+#         "X-Auth-Scheme": "langsmith-api-key",
+#     },
+# )
+
+# # Start a new thread
+# def get_thread_id():
+#     thread = langsmith_client.threads.create()
+#     return thread['thread_id']
 
 class QuestionRequest(BaseModel):
     question: str
 
 @app.post("/api")
 def ask(body: QuestionRequest):
-    # client = OpenAI()
-    # prompt = [{"role": "user", "content": body.question}]
-    # response = client.chat.completions.create(model="gpt-4o-mini", messages=prompt)
-    # return response.choices[0].message.content
+    client = OpenAI()
+    prompt = [{"role": "user", "content": body.question}]
+    stream = client.chat.completions.create(model="gpt-5-nano", messages=prompt, stream=True)
 
-    langsmith_client = get_client(
-        url=LANGSMITH_API_URL,
-        api_key=LANGSMITH_API_KEY,
-        headers={
-            "X-Auth-Scheme": "langsmith-api-key",
-            },
-        )
+
+    # langsmith_client = get_client(
+    #     url=LANGSMITH_API_URL,
+    #     api_key=LANGSMITH_API_KEY,
+    #     headers={
+    #         "X-Auth-Scheme": "langsmith-api-key",
+    #         },
+    #     )
     
-    thread_id = get_thread_id()
+    # thread_id = get_thread_id()
 
-    # Start a streaming run
-    query = {"messages": [{"role": "human", "content": body.question}]}
+    # # Start a streaming run
+    # query = {"messages": [{"role": "human", "content": body.question}]}
     
     def event_stream():
-        for chunk in langsmith_client.runs.stream(thread_id, LANGSMITH_AGENT_ID, input=query):
-            text = chunk.data['messages'][1]['content']
+        for chunk in stream: # langsmith_client.runs.stream(thread_id, LANGSMITH_AGENT_ID, input=query):
+            # text = chunk.data['messages'][1]['content']
+            text = chunk.choices[0].delta.content
             if text:
                 lines = text.split("\n")
                 for line in lines:
