@@ -35,7 +35,23 @@ class QuestionRequest(BaseModel):
 
 @app.post("/api", response_class=PlainTextResponse)
 def ask(body: QuestionRequest):
-    client = OpenAI()
-    prompt = [{"role": "user", "content": body.question}]
-    response = client.chat.completions.create(model="gpt-4o-mini", messages=prompt)
-    return response.choices[0].message.content
+    # client = OpenAI()
+    # prompt = [{"role": "user", "content": body.question}]
+    # response = client.chat.completions.create(model="gpt-4o-mini", messages=prompt)
+    # return response.choices[0].message.content
+
+    langsmith_client = get_client(
+        url=LANGSMITH_API_URL,
+        api_key=LANGSMITH_API_KEY,
+        headers={
+            "X-Auth-Scheme": "langsmith-api-key",
+            },
+        )
+    
+    # Start a new thread
+    thread = await langsmith_client.threads.create()
+
+    # Start a streaming run
+    query = {"messages": [{"role": "human", "content": body.question}]}
+    async for chunk in langsmith_client.runs.stream(thread['thread_id'], LANGSMITH_AGENT_ID, input=query):
+        print("Yes")
