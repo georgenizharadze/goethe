@@ -28,7 +28,7 @@ def ask(body: QuestionRequest):
             },
         )
     
-    return f"LS Client: {langsmith_client}"
+    return f"LS Client: {body.question} {langsmith_client}"
 
 
 
