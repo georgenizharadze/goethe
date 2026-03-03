@@ -30,6 +30,9 @@ async for chunk in langsmith_client.runs.stream(thread['thread_id'], LANGSMITH_A
 
 app = FastAPI()
 
+# Start a new thread
+thread = await langsmith_client.threads.create()
+
 class QuestionRequest(BaseModel):
     question: str
 
@@ -47,9 +50,6 @@ def ask(body: QuestionRequest):
             "X-Auth-Scheme": "langsmith-api-key",
             },
         )
-    
-    # Start a new thread
-    thread = await langsmith_client.threads.create()
 
     # Start a streaming run
     query = {"messages": [{"role": "human", "content": body.question}]}
