@@ -21,8 +21,8 @@ langsmith_client = get_client(
 app = FastAPI()
 
 # Start a new thread
-async def get_thread_id():
-    thread = await langsmith_client.threads.create()
+def get_thread_id():
+    thread = langsmith_client.threads.create()
     return thread['thread_id']
 
 class QuestionRequest(BaseModel):
@@ -43,9 +43,9 @@ def ask(body: QuestionRequest):
             },
         )
     
-    thread_id = await get_thread_id()
+    thread_id = get_thread_id()
 
     # Start a streaming run
     query = {"messages": [{"role": "human", "content": body.question}]}
-    async for chunk in langsmith_client.runs.stream(thread_id, LANGSMITH_AGENT_ID, input=query):
+    for chunk in langsmith_client.runs.stream(thread_id, LANGSMITH_AGENT_ID, input=query):
         print("Yes")
