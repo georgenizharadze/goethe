@@ -1,4 +1,5 @@
 import os
+import asyncio
 from fastapi import FastAPI  # type: ignore
 from fastapi.responses import PlainTextResponse  # type: ignore
 from pydantic import BaseModel  # type: ignore
@@ -16,6 +17,16 @@ langsmith_client = get_client(
         "X-Auth-Scheme": "langsmith-api-key",
     },
 )
+
+# Start a new thread
+thread = await langsmith_client.threads.create()
+
+# Start a streaming run
+query = {"messages": [{"role": "human", "content": "How can you help me improve my German writing skills?"}]}
+# async for chunk in client.runs.stream(thread['thread_id'], agent_id, input=query):
+#     print(chunk)
+
+response = await langsmith_client.runs.create(thread['thread_id'], LANGSMITH_AGENT_ID, input=query)
 
 app = FastAPI()
 
