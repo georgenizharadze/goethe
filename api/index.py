@@ -2,6 +2,7 @@ from fastapi import FastAPI  # type: ignore
 from fastapi.responses import PlainTextResponse  # type: ignore
 from pydantic import BaseModel  # type: ignore
 from openai import OpenAI  # type: ignore
+from langgraph_sdk.client import get_client
 
 app = FastAPI()
 
