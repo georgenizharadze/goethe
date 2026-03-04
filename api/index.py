@@ -20,18 +20,16 @@ class QuestionRequest(BaseModel):
 @app.post("/api")
 async def ask(body: QuestionRequest):
 
-    langsmith_client = get_client(
+    async with get_client(
         url=LANGSMITH_API_URL,
         api_key=LANGSMITH_API_KEY,
-        headers={
-            "X-Auth-Scheme": "langsmith-api-key",
-            },
-        )
+        headers={"X-Auth-Scheme": "langsmith-api-key"},
+    ) as langsmith_client:
 
-    await langsmith_client.threads.create()
-    # thread_id = thread['thread_id']
+        thread = await langsmith_client.threads.create()
+        thread_id = thread['thread_id']
     
-    return f"LS Client: {body.question}' '{langsmith_client}"
+    return thread_id
 
 
 
