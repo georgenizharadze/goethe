@@ -20,20 +20,25 @@ class QuestionRequest(BaseModel):
 @app.post("/api")
 async def ask(body: QuestionRequest):
 
-    async with httpx.AsyncClient(
-        base_url=LANGSMITH_API_URL,
+    langsmith_client = get_client(
+        url=LANGSMITH_API_URL,
+        api_key=LANGSMITH_API_KEY,
         headers={
-            "x-api-key": LANGSMITH_API_KEY,
             "X-Auth-Scheme": "langsmith-api-key",
-        },
-        timeout=30.0,
-    ) as client:
-        response = await client.post("/threads", json={})
-        response.raise_for_status()
-        thread = response.json()
-        thread_id = thread["thread_id"]
+            },
+        )
 
-    return thread_id
+    result = await langsmith_client.runs.wait(
+        None,
+        LANGSMITH_AGENT_ID,
+        input={
+            "messages": [
+                {"role": "user", "content": "What can you help me with?"}
+            ]
+        },
+    )
+
+    return result
 
 
 
