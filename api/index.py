@@ -1,5 +1,5 @@
 import os
-import asyncio
+import httpx
 from fastapi import FastAPI  # type: ignore
 from fastapi.responses import PlainTextResponse  # type: ignore
 from fastapi.responses import StreamingResponse
@@ -18,17 +18,21 @@ class QuestionRequest(BaseModel):
     question: str
 
 @app.post("/api")
-def ask(body: QuestionRequest):
+async def ask(body: QuestionRequest):
 
-    async with get_client(
-        url=LANGSMITH_API_URL,
-        api_key=LANGSMITH_API_KEY,
-        headers={"X-Auth-Scheme": "langsmith-api-key"},
-    ) as langsmith_client:
+    async with httpx.AsyncClient(
+        base_url=LANGSMITH_API_URL,
+        headers={
+            "x-api-key": LANGSMITH_API_KEY,
+            "X-Auth-Scheme": "langsmith-api-key",
+        },
+        timeout=30.0,
+    ) as client:
+        response = await client.post("/threads", json={})
+        response.raise_for_status()
+        thread = response.json()
+        thread_id = thread["thread_id"]
 
-        thread = await langsmith_client.threads.create()
-        thread_id = thread['thread_id']
-    
     return thread_id
 
 
