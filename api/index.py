@@ -18,7 +18,7 @@ class QuestionRequest(BaseModel):
     question: str
 
 @app.post("/api")
-async def ask(body: QuestionRequest):
+def ask(body: QuestionRequest):
 
     async with get_client(
         url=LANGSMITH_API_URL,
