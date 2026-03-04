@@ -28,7 +28,7 @@ async def ask(body: QuestionRequest):
             },
         )
 
-    thread = await langsmith_client.threads.create()
+    # thread = await langsmith_client.threads.create()
     # thread_id = thread['thread_id']
 
     
