@@ -1,4 +1,5 @@
 import os
+import asyncio
 from fastapi import FastAPI  # type: ignore
 from fastapi.responses import PlainTextResponse  # type: ignore
 from fastapi.responses import StreamingResponse
@@ -25,7 +26,7 @@ class QuestionRequest(BaseModel):
 @app.post("/api")
 async def ask(body: QuestionRequest):
 
-    # thread = await langsmith_client.threads.create()
+    thread = await langsmith_client.threads.create()
     # thread_id = thread['thread_id']
 
     
