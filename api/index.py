@@ -28,10 +28,8 @@ async def ask(body: QuestionRequest):
             },
         )
 
-    # thread = await langsmith_client.threads.create()
+    await langsmith_client.threads.create()
     # thread_id = thread['thread_id']
-    await asyncio.sleep(60)
-
     
     return f"LS Client: {body.question}' '{langsmith_client}"
 
