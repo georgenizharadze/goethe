@@ -23,9 +23,13 @@ class QuestionRequest(BaseModel):
     question: str
 
 @app.post("/api")
-def ask(body: QuestionRequest):
+async def ask(body: QuestionRequest):
+
+    thread = langsmith_client.threads.create()
+    thread_id = thread['thread_id']
+
     
-    return f"LS Client: {body.question} {langsmith_client}"
+    return f"LS Client: {body.question}' '{langsmith_client} 'thread_id: '{thread_id}"
 
 
 
