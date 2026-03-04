@@ -13,18 +13,20 @@ LANGSMITH_AGENT_ID = os.getenv("LANGSMITH_AGENT_ID")
 
 app = FastAPI()
 
-langsmith_client = get_client(
-    url=LANGSMITH_API_URL,
-    api_key=LANGSMITH_API_KEY,
-    headers={
-        "X-Auth-Scheme": "langsmith-api-key",
-        },
-    )
+
 class QuestionRequest(BaseModel):
     question: str
 
 @app.post("/api")
 async def ask(body: QuestionRequest):
+
+    langsmith_client = get_client(
+        url=LANGSMITH_API_URL,
+        api_key=LANGSMITH_API_KEY,
+        headers={
+            "X-Auth-Scheme": "langsmith-api-key",
+            },
+        )
 
     thread = await langsmith_client.threads.create()
     # thread_id = thread['thread_id']
