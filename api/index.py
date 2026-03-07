@@ -28,17 +28,7 @@ async def ask(body: QuestionRequest):
             },
         )
 
-    result = await langsmith_client.runs.wait(
-        None,
-        LANGSMITH_AGENT_ID,
-        input={
-            "messages": [
-                {"role": "user", "content": "What can you help me with?"}
-            ]
-        },
-    )
-
-    return result
+    return f"{langsmith_client}"
 
 
 
